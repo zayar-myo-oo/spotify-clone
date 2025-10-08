@@ -15,6 +15,16 @@ const userSchema = new mongoose.Schema(
 			required: true,
 			unique: true,
 		},
+		isArtist: {
+			type: Boolean,
+			required: false,
+			default: false,
+		},
+		status: {
+			type: String,
+			required: false,
+			default: 2,
+		},
 	},
 	{ timestamps: true } //  createdAt, updatedAt
 );

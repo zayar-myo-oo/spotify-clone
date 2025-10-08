@@ -28,3 +28,17 @@ export const getMessages = async (req, res, next) => {
 		next(error);
 	}
 };
+
+export const requestArtistRole = async (req, res, next) => {
+	try {
+		const userId = req.auth.userId;
+		const user = await User.findOneAndUpdate(
+			{ clerkId: userId },
+			{ $set: { status: 1 } },
+			{ new: true }
+		);
+		res.status(200).json(user);
+	} catch (error) {
+		next(error);
+	}
+};
