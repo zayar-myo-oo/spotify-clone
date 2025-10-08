@@ -15,6 +15,21 @@ const userSchema = new mongoose.Schema(
 			required: true,
 			unique: true,
 		},
+		likedSongs: [{
+			type: mongoose.Schema.Types.ObjectId,
+			ref: "Song",
+		}],
+		followedArtists: [{
+			type: String, // Artist names
+		}],
+		likedAlbums: [{
+			type: mongoose.Schema.Types.ObjectId,
+			ref: "Album",
+		}],
+		playlists: [{
+			type: mongoose.Schema.Types.ObjectId,
+			ref: "Playlist",
+		}],
 	},
 	{ timestamps: true } //  createdAt, updatedAt
 );

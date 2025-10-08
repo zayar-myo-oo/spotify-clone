@@ -2,13 +2,25 @@ import { Song } from "@/types";
 import SectionGridSkeleton from "./SectionGridSkeleton";
 import { Button } from "@/components/ui/button";
 import PlayButton from "./PlayButton";
+import { useLibraryStore } from "@/stores/useLibraryStore";
+import { Heart, MoreHorizontal, Plus } from "lucide-react";
+import { useState } from "react";
+import AddToPlaylistDialog from "@/components/AddToPlaylistDialog";
 
 type SectionGridProps = {
 	title: string;
 	songs: Song[];
 	isLoading: boolean;
 };
+
 const SectionGrid = ({ songs, title, isLoading }: SectionGridProps) => {
+	const { toggleLikeSong, userLibrary } = useLibraryStore();
+	const [selectedSongForPlaylist, setSelectedSongForPlaylist] = useState<Song | null>(null);
+
+	const isLiked = (songId: string) => {
+		return userLibrary?.likedSongs.some(song => song._id === songId) || false;
+	};
+
 	if (isLoading) return <SectionGridSkeleton />;
 
 	return (
@@ -21,27 +33,80 @@ const SectionGrid = ({ songs, title, isLoading }: SectionGridProps) => {
 			</div>
 
 			<div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4'>
-				{songs.map((song) => (
-					<div
-						key={song._id}
-						className='bg-zinc-800/40 p-4 rounded-md hover:bg-zinc-700/40 transition-all group cursor-pointer'
-					>
-						<div className='relative mb-4'>
-							<div className='aspect-square rounded-md shadow-lg overflow-hidden'>
-								<img
-									src={song.imageUrl}
-									alt={song.title}
-									className='w-full h-full object-cover transition-transform duration-300 
-									group-hover:scale-105'
-								/>
+				{songs.map((song) => {
+					const songIsLiked = isLiked(song._id);
+					
+					return (
+						<div
+							key={song._id}
+							className='bg-zinc-800/40 p-4 rounded-md hover:bg-zinc-700/40 transition-all group cursor-pointer'
+						>
+							<div className='relative mb-4'>
+								<div className='aspect-square rounded-md shadow-lg overflow-hidden'>
+									<img
+										src={song.imageUrl}
+										alt={song.title}
+										className='w-full h-full object-cover transition-transform duration-300 
+										group-hover:scale-105'
+									/>
+								</div>
+								<PlayButton song={song} />
 							</div>
-							<PlayButton song={song} />
+							
+							<h3 className='font-medium mb-2 truncate'>{song.title}</h3>
+							<p className='text-sm text-zinc-400 truncate mb-3'>{song.artist}</p>
+
+							{/* Action buttons */}
+							<div className="flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity">
+								<div className="flex items-center gap-2">
+									<Button
+										variant="ghost"
+										size="icon"
+										className="h-8 w-8 text-zinc-400 hover:text-white"
+										onClick={(e) => {
+											e.stopPropagation();
+											toggleLikeSong(song._id);
+										}}
+									>
+										<Heart 
+											className={`h-4 w-4 ${songIsLiked ? 'fill-green-500 text-green-500' : ''}`} 
+										/>
+									</Button>
+									
+									<Button
+										variant="ghost"
+										size="icon"
+										className="h-8 w-8 text-zinc-400 hover:text-white"
+										onClick={(e) => {
+											e.stopPropagation();
+											setSelectedSongForPlaylist(song);
+										}}
+									>
+										<Plus className="h-4 w-4" />
+									</Button>
+								</div>
+								
+								<Button
+									variant="ghost"
+									size="icon"
+									className="h-8 w-8 text-zinc-400 hover:text-white"
+								>
+									<MoreHorizontal className="h-4 w-4" />
+								</Button>
+							</div>
 						</div>
-						<h3 className='font-medium mb-2 truncate'>{song.title}</h3>
-						<p className='text-sm text-zinc-400 truncate'>{song.artist}</p>
-					</div>
-				))}
+					);
+				})}
 			</div>
+
+			{/* Add to Playlist Dialog */}
+			{selectedSongForPlaylist && (
+				<AddToPlaylistDialog
+					song={selectedSongForPlaylist}
+					isOpen={!!selectedSongForPlaylist}
+					onClose={() => setSelectedSongForPlaylist(null)}
+				/>
+			)}
 		</div>
 	);
 };
