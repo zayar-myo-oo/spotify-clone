@@ -7,6 +7,7 @@ import { Clock, Heart, MoreHorizontal, Pause, Play, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import AddToPlaylistDialog from "@/components/AddToPlaylistDialog";
+import { useNavigate } from "react-router-dom";
 import { Song } from "@/types";
 
 const formatDuration = (seconds: number) => {
@@ -27,6 +28,7 @@ const AlbumPage = () => {
 	} = useLibraryStore();
 	
 	const [selectedSongForPlaylist, setSelectedSongForPlaylist] = useState<Song | null>(null);
+	const navigate = useNavigate();
 
 	useEffect(() => {
 		if (albumId) fetchAlbumById(albumId);
@@ -175,6 +177,10 @@ const AlbumPage = () => {
 											<div
 												key={song._id}
 												onClick={() => handlePlaySong(index)}
+												onContextMenu={(e) => {
+													e.preventDefault();
+													navigate(`/song/${song._id}`);
+												}}
 												className={`grid grid-cols-[16px_4fr_2fr_1fr_auto] gap-4 px-4 py-2 text-sm 
                       text-zinc-400 hover:bg-white/5 rounded-md group cursor-pointer
                       `}
@@ -195,7 +201,15 @@ const AlbumPage = () => {
 
 													<div>
 														<div className={`font-medium text-white`}>{song.title}</div>
-														<div>{song.artist}</div>
+														<div 
+															className='hover:text-white hover:underline cursor-pointer'
+															onClick={(e) => {
+																e.stopPropagation();
+																navigate(`/artist/${encodeURIComponent(song.artist)}`);
+															}}
+														>
+															{song.artist}
+														</div>
 													</div>
 												</div>
 												<div className='flex items-center'>{song.createdAt.split("T")[0]}</div>

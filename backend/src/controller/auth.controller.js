@@ -22,3 +22,15 @@ export const authCallback = async (req, res, next) => {
 		next(error);
 	}
 };
+
+export const getCurrentUser = async (req, res, next) => {
+	try {
+		const user = await User.findOne({ clerkId: req.auth.userId });
+		if (!user) {
+			return res.status(404).json({ message: "User not found" });
+		}
+		res.status(200).json(user);
+	} catch (error) {
+		next(error);
+	}
+};

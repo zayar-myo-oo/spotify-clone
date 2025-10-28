@@ -6,7 +6,11 @@ import MainLayout from "./layout/MainLayout";
 import ChatPage from "./pages/chat/ChatPage";
 import AlbumPage from "./pages/album/AlbumPage";
 import AdminPage from "./pages/admin/AdminPage";
+import ArtistDashboard from "./pages/artist/ArtistDashboard";
 import PlaylistPage from "./pages/playlist/PlaylistPage";
+import SongPage from "./pages/song/SongPage";
+import ChartsPage from "./pages/charts/ChartsPage";
+import ArtistProfilePage from "./pages/artist-profile/ArtistProfilePage";
 import AllAlbumsPage from "./pages/albums/AllAlbumsPage";
 
 import { Toaster } from "react-hot-toast";
@@ -23,6 +27,7 @@ function App() {
 				/>
 				<Route path='/auth-callback' element={<AuthCallbackPage />} />
 				<Route path='/admin' element={<AdminPage />} />
+				<Route path='/artist' element={<ArtistDashboard />} />
 
 				<Route element={<MainLayout />}>
 					<Route path='/' element={<HomePage />} />
@@ -30,6 +35,9 @@ function App() {
 					<Route path='/search' element={<SearchPage />} />
 					<Route path='/albums' element={<AllAlbumsPage />} />
 					<Route path='/albums/:albumId' element={<AlbumPage />} />
+					<Route path='/song/:songId' element={<SongPage />} />
+					<Route path='/charts' element={<ChartsPage />} />
+					<Route path='/artist/:artistName' element={<ArtistProfilePage />} />
 					<Route path='/playlist/:id' element={<PlaylistPage />} />
 					<Route path='*' element={<NotFoundPage />} />
 				</Route>

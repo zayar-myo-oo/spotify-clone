@@ -30,6 +30,18 @@ const userSchema = new mongoose.Schema(
 			type: mongoose.Schema.Types.ObjectId,
 			ref: "Playlist",
 		}],
+		isArtist: {
+			type: Boolean,
+			default: false,
+		},
+		artistName: String,
+		artistBio: String,
+		artistProfileImage: String,
+		genre: String,
+		followers: [{
+			type: mongoose.Schema.Types.ObjectId,
+			ref: "User",
+		}],
 	},
 	{ timestamps: true } //  createdAt, updatedAt
 );

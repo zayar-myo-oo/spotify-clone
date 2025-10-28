@@ -1,16 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useMusicStore } from "@/stores/useMusicStore";
-import { Calendar, ChevronDown, ChevronRight, Music, Trash2 } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import { useArtistStore } from "@/stores/useArtistStore";
+import { Calendar, ChevronDown, ChevronRight, Music, Edit } from "lucide-react";
+import React, { useState } from "react";
 
-const AlbumsTable = () => {
-	const { albums, deleteAlbum, fetchAlbums } = useMusicStore();
+const ArtistAlbumsTable = () => {
+	const { albums, isLoading, error } = useArtistStore();
 	const [expandedAlbums, setExpandedAlbums] = useState<Set<string>>(new Set());
-
-	useEffect(() => {
-		fetchAlbums();
-	}, [fetchAlbums]);
 
 	const toggleAlbum = (albumId: string) => {
 		setExpandedAlbums(prev => {
@@ -24,13 +20,28 @@ const AlbumsTable = () => {
 		});
 	};
 
+	if (isLoading) {
+		return (
+			<div className='flex items-center justify-center py-8'>
+				<div className='text-zinc-400'>Loading albums...</div>
+			</div>
+		);
+	}
+
+	if (error) {
+		return (
+			<div className='flex items-center justify-center py-8'>
+				<div className='text-red-400'>{error}</div>
+			</div>
+		);
+	}
+
 	return (
 		<Table>
 			<TableHeader>
 				<TableRow className='hover:bg-zinc-800/50'>
 					<TableHead className='w-[50px]'></TableHead>
 					<TableHead>Title</TableHead>
-					<TableHead>Artist</TableHead>
 					<TableHead>Release Year</TableHead>
 					<TableHead>Songs</TableHead>
 					<TableHead className='text-right'>Actions</TableHead>
@@ -44,7 +55,6 @@ const AlbumsTable = () => {
 								<img src={album.imageUrl} alt={album.title} className='w-10 h-10 rounded object-cover' />
 							</TableCell>
 							<TableCell className='font-medium'>{album.title}</TableCell>
-							<TableCell>{album.artist}</TableCell>
 							<TableCell>
 								<span className='inline-flex items-center gap-1 text-zinc-400'>
 									<Calendar className='h-4 w-4' />
@@ -68,17 +78,16 @@ const AlbumsTable = () => {
 									<Button
 										variant='ghost'
 										size='sm'
-										onClick={() => deleteAlbum(album._id)}
-										className='text-red-400 hover:text-red-300 hover:bg-red-400/10'
+										className='text-blue-400 hover:text-blue-300 hover:bg-blue-400/10'
 									>
-										<Trash2 className='h-4 w-4' />
+										<Edit className='h-4 w-4' />
 									</Button>
 								</div>
 							</TableCell>
 						</TableRow>
 						{expandedAlbums.has(album._id) && (
 							<TableRow key={`expanded-${album._id}`}>
-								<TableCell colSpan={6} className='bg-zinc-800/30 p-4'>
+								<TableCell colSpan={5} className='bg-zinc-800/30 p-4'>
 									{album.songs.length > 0 ? (
 										<div className='space-y-2'>
 											<h4 className='font-medium text-zinc-300 mb-3'>Songs in this album:</h4>
@@ -113,4 +122,5 @@ const AlbumsTable = () => {
 		</Table>
 	);
 };
-export default AlbumsTable;
+
+export default ArtistAlbumsTable;

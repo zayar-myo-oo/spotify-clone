@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { Song } from "@/types";
 import { useChatStore } from "./useChatStore";
+import { axiosInstance } from "@/lib/axios";
 
 interface PlayerStore {
 	currentSong: Song | null;
@@ -52,6 +53,9 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
 
 	setCurrentSong: (song: Song | null) => {
 		if (!song) return;
+
+		// Track play count
+		axiosInstance.post(`/charts/play/${song._id}`).catch(console.error);
 
 		const socket = useChatStore.getState().socket;
 		if (socket.auth) {

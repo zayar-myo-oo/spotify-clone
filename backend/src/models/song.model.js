@@ -27,6 +27,22 @@ const songSchema = new mongoose.Schema(
 			ref: "Album",
 			required: false,
 		},
+		playCount: {
+			type: Number,
+			default: 0,
+		},
+		weeklyPlays: {
+			type: Number,
+			default: 0,
+		},
+		monthlyPlays: {
+			type: Number,
+			default: 0,
+		},
+		lastPlayedAt: {
+			type: Date,
+			default: Date.now,
+		},
 	},
 	{ timestamps: true }
 );

@@ -1,10 +1,11 @@
 import { useAuthStore } from "@/stores/useAuthStore";
 import Header from "./components/Header";
 import DashboardStats from "./components/DashboardStats";
-import { Album, Music } from "lucide-react";
+import { Album, Music, Users } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SongsTabContent from "./components/SongsTabContent";
 import AlbumsTabContent from "./components/AlbumsTabContent";
+import ArtistRequestsTable from "./components/ArtistRequestsTable";
 import { useEffect } from "react";
 import { useMusicStore } from "@/stores/useMusicStore";
 
@@ -40,6 +41,10 @@ const AdminPage = () => {
 						<Album className='mr-2 size-4' />
 						Albums
 					</TabsTrigger>
+					<TabsTrigger value='artist-requests' className='data-[state=active]:bg-zinc-700'>
+						<Users className='mr-2 size-4' />
+						Artist Requests
+					</TabsTrigger>
 				</TabsList>
 
 				<TabsContent value='songs'>
@@ -47,6 +52,14 @@ const AdminPage = () => {
 				</TabsContent>
 				<TabsContent value='albums'>
 					<AlbumsTabContent />
+				</TabsContent>
+				<TabsContent value='artist-requests'>
+					<div className='bg-zinc-800/50 rounded-lg p-6'>
+						<div className='flex items-center justify-between mb-6'>
+							<h2 className='text-xl font-semibold'>Artist Requests</h2>
+						</div>
+						<ArtistRequestsTable />
+					</div>
 				</TabsContent>
 			</Tabs>
 		</div>

@@ -3,9 +3,11 @@ import SectionGridSkeleton from "./SectionGridSkeleton";
 import { Button } from "@/components/ui/button";
 import PlayButton from "./PlayButton";
 import { useLibraryStore } from "@/stores/useLibraryStore";
+import { usePlayerStore } from "@/stores/usePlayerStore";
 import { Heart, MoreHorizontal, Plus } from "lucide-react";
 import { useState } from "react";
 import AddToPlaylistDialog from "@/components/AddToPlaylistDialog";
+import { useNavigate } from "react-router-dom";
 
 type SectionGridProps = {
 	title: string;
@@ -15,7 +17,9 @@ type SectionGridProps = {
 
 const SectionGrid = ({ songs, title, isLoading }: SectionGridProps) => {
 	const { toggleLikeSong, userLibrary } = useLibraryStore();
+	const { currentSong } = usePlayerStore();
 	const [selectedSongForPlaylist, setSelectedSongForPlaylist] = useState<Song | null>(null);
+	const navigate = useNavigate();
 
 	const isLiked = (songId: string) => {
 		return userLibrary?.likedSongs.some(song => song._id === songId) || false;
@@ -40,6 +44,7 @@ const SectionGrid = ({ songs, title, isLoading }: SectionGridProps) => {
 						<div
 							key={song._id}
 							className='bg-zinc-800/40 p-4 rounded-md hover:bg-zinc-700/40 transition-all group cursor-pointer'
+							onClick={() => navigate(`/song/${song._id}`)}
 						>
 							<div className='relative mb-4'>
 								<div className='aspect-square rounded-md shadow-lg overflow-hidden'>
@@ -53,8 +58,33 @@ const SectionGrid = ({ songs, title, isLoading }: SectionGridProps) => {
 								<PlayButton song={song} />
 							</div>
 							
-							<h3 className='font-medium mb-2 truncate'>{song.title}</h3>
-							<p className='text-sm text-zinc-400 truncate mb-3'>{song.artist}</p>
+							<div className='flex items-center justify-between mb-2'>
+								<h3 className='font-medium truncate flex-1'>{song.title}</h3>
+								{currentSong?._id === song._id && (
+									<Button
+										variant="ghost"
+										size="icon"
+										className="h-6 w-6 text-zinc-400 hover:text-red-500 ml-2"
+										onClick={(e) => {
+											e.stopPropagation();
+											toggleLikeSong(song._id);
+										}}
+									>
+										<Heart 
+											className={`h-4 w-4 ${songIsLiked ? 'fill-red-500 text-red-500' : ''}`} 
+										/>
+									</Button>
+								)}
+							</div>
+							<p 
+								className='text-sm text-zinc-400 truncate mb-3 hover:text-white hover:underline cursor-pointer'
+								onClick={(e) => {
+									e.stopPropagation();
+									navigate(`/artist/${encodeURIComponent(song.artist)}`);
+								}}
+							>
+								{song.artist}
+							</p>
 
 							{/* Action buttons */}
 							<div className="flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity">

@@ -20,11 +20,10 @@ interface NewSong {
 	title: string;
 	artist: string;
 	album: string;
-	duration: string;
 }
 
 const AddSongDialog = () => {
-	const { albums } = useMusicStore();
+	const { albums, fetchSongs } = useMusicStore();
 	const [songDialogOpen, setSongDialogOpen] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
 
@@ -32,7 +31,6 @@ const AddSongDialog = () => {
 		title: "",
 		artist: "",
 		album: "",
-		duration: "0",
 	});
 
 	const [files, setFiles] = useState<{ audio: File | null; image: File | null }>({
@@ -55,7 +53,6 @@ const AddSongDialog = () => {
 
 			formData.append("title", newSong.title);
 			formData.append("artist", newSong.artist);
-			formData.append("duration", newSong.duration);
 			if (newSong.album && newSong.album !== "none") {
 				formData.append("albumId", newSong.album);
 			}
@@ -63,24 +60,22 @@ const AddSongDialog = () => {
 			formData.append("audioFile", files.audio);
 			formData.append("imageFile", files.image);
 
-			await axiosInstance.post("/admin/songs", formData, {
-				headers: {
-					"Content-Type": "multipart/form-data",
-				},
-			});
+			await axiosInstance.post("/admin/songs", formData);
 
 			setNewSong({
 				title: "",
 				artist: "",
 				album: "",
-				duration: "0",
 			});
 
 			setFiles({
 				audio: null,
 				image: null,
 			});
+			// Refresh songs list
+			await fetchSongs();
 			toast.success("Song added successfully");
+			setSongDialogOpen(false);
 		} catch (error: any) {
 			toast.error("Failed to add song: " + error.message);
 		} finally {
@@ -174,16 +169,7 @@ const AddSongDialog = () => {
 						/>
 					</div>
 
-					<div className='space-y-2'>
-						<label className='text-sm font-medium'>Duration (seconds)</label>
-						<Input
-							type='number'
-							min='0'
-							value={newSong.duration}
-							onChange={(e) => setNewSong({ ...newSong, duration: e.target.value || "0" })}
-							className='bg-zinc-800 border-zinc-700'
-						/>
-					</div>
+
 
 					<div className='space-y-2'>
 						<label className='text-sm font-medium'>Album (Optional)</label>

@@ -1,7 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { usePlayerStore } from "@/stores/usePlayerStore";
-import { Laptop2, ListMusic, Mic2, Pause, Play, Repeat, Shuffle, SkipBack, SkipForward, Volume1 } from "lucide-react";
+import { Heart, Laptop2, ListMusic, Mic2, Pause, Play, Repeat, Shuffle, SkipBack, SkipForward, Volume1 } from "lucide-react";
+import { useLibraryStore } from "@/stores/useLibraryStore";
+import { useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 
 const formatTime = (seconds: number) => {
@@ -12,6 +14,8 @@ const formatTime = (seconds: number) => {
 
 export const PlaybackControls = () => {
 	const { currentSong, isPlaying, togglePlay, playNext, playPrevious } = usePlayerStore();
+	const { toggleLikeSong, userLibrary } = useLibraryStore();
+	const navigate = useNavigate();
 
 	const [volume, setVolume] = useState(75);
 	const [currentTime, setCurrentTime] = useState(0);
@@ -61,14 +65,31 @@ export const PlaybackControls = () => {
 								alt={currentSong.title}
 								className='w-14 h-14 object-cover rounded-md'
 							/>
-							<div className='flex-1 min-w-0'>
+							<div className='flex flex-col gap-1 overflow-hidden'>
 								<div className='font-medium truncate hover:underline cursor-pointer'>
 									{currentSong.title}
 								</div>
-								<div className='text-sm text-zinc-400 truncate hover:underline cursor-pointer'>
+								<div 
+									className='text-sm text-zinc-400 truncate hover:underline cursor-pointer'
+									onClick={() => navigate(`/artist/${encodeURIComponent(currentSong.artist)}`)}
+								>
 									{currentSong.artist}
 								</div>
 							</div>
+							<Button
+								variant="ghost"
+								size="icon"
+								className="h-8 w-8 text-zinc-400 hover:text-green-500"
+								onClick={() => toggleLikeSong(currentSong._id)}
+							>
+								<Heart
+									className={`h-4 w-4 ${
+										userLibrary?.likedSongs.some(s => s._id === currentSong._id) 
+											? 'fill-green-500 text-green-500' 
+											: ''
+									}`}
+								/>
+							</Button>
 						</>
 					)}
 				</div>
