@@ -1,26 +1,3 @@
-# 🎵 Spotify Clone - Full Stack Music Application
-
-![Demo App](/frontend/public/screenshot-for-readme.png)
-
-A full-stack Spotify clone built with React, TypeScript, Node.js, Express, and MongoDB. Features include music playback, custom playlists, real-time chat, user library management, and an admin dashboard.
-
-## ✨ Features
-
-- 🎸 Music playback with play, pause, next, previous controls
-- 🔈 Volume control with slider
-- 📱 Custom playlist creation and management
-- ❤️ Like songs, albums, and follow artists
-- 📚 Personal library with liked songs, albums, and playlists
-- 💬 Real-time chat integrated into the application
-- 👥 See what other users are listening to in real-time
-- 👨‍💼 Online/Offline status indicators
-- 🎧 Admin dashboard to create albums and songs
-- 📊 Analytics and statistics dashboard
-- 🔍 Search functionality for songs and artists
-- 🎨 Spotify-inspired UI with smooth animations
-
----
-
 ## 📋 Table of Contents
 
 - [Prerequisites](#prerequisites)
