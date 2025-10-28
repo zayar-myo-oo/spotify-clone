@@ -12,6 +12,7 @@ interface MusicStore {
 	featuredSongs: Song[];
 	madeForYouSongs: Song[];
 	trendingSongs: Song[];
+	searchResults: Song[];
 	stats: Stats;
 
 	fetchAlbums: () => Promise<void>;
@@ -21,6 +22,9 @@ interface MusicStore {
 	fetchTrendingSongs: () => Promise<void>;
 	fetchStats: () => Promise<void>;
 	fetchSongs: () => Promise<void>;
+	searchSongs: (query: string) => Promise<void>;
+	clearSearchResults: () => void;
+	updateSong: (id: string, formData: FormData) => Promise<void>;
 	deleteSong: (id: string) => Promise<void>;
 	deleteAlbum: (id: string) => Promise<void>;
 }
@@ -34,11 +38,29 @@ export const useMusicStore = create<MusicStore>((set) => ({
 	madeForYouSongs: [],
 	featuredSongs: [],
 	trendingSongs: [],
+	searchResults: [],
 	stats: {
 		totalSongs: 0,
 		totalAlbums: 0,
 		totalUsers: 0,
 		totalArtists: 0,
+	},
+
+	updateSong: async (id, formData) => {
+		set({ isLoading: true, error: null });
+		try {
+			const response = await axiosInstance.put(`/admin/songs/${id}`, formData);
+
+			set((state) => ({
+				songs: state.songs.map((song) => (song._id === id ? response.data : song)),
+			}));
+			toast.success("Song updated successfully");
+		} catch (error: any) {
+			console.log("Error in updateSong", error);
+			toast.error("Error updating song");
+		} finally {
+			set({ isLoading: false });
+		}
 	},
 
 	deleteSong: async (id) => {
@@ -159,5 +181,26 @@ export const useMusicStore = create<MusicStore>((set) => ({
 		} finally {
 			set({ isLoading: false });
 		}
+	},
+
+	searchSongs: async (query) => {
+		if (!query.trim()) {
+			set({ searchResults: [] });
+			return;
+		}
+
+		set({ isLoading: true, error: null });
+		try {
+			const response = await axiosInstance.get(`/songs/search?query=${encodeURIComponent(query)}`);
+			set({ searchResults: response.data });
+		} catch (error: any) {
+			set({ error: error.response?.data?.message || "Failed to search songs" });
+		} finally {
+			set({ isLoading: false });
+		}
+	},
+
+	clearSearchResults: () => {
+		set({ searchResults: [] });
 	},
 }));

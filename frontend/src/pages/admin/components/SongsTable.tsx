@@ -1,10 +1,25 @@
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useMusicStore } from "@/stores/useMusicStore";
-import { Calendar, Trash2 } from "lucide-react";
+import { Calendar, Edit, Trash2 } from "lucide-react";
+import { useState } from "react";
+import EditSongDialog from "./EditSongDialog";
+import { Song } from "@/types";
 
 const SongsTable = () => {
 	const { songs, isLoading, error, deleteSong } = useMusicStore();
+	const [editingSong, setEditingSong] = useState<Song | null>(null);
+	const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+
+	const handleEditSong = (song: Song) => {
+		setEditingSong(song);
+		setIsEditDialogOpen(true);
+	};
+
+	const handleCloseEditDialog = () => {
+		setEditingSong(null);
+		setIsEditDialogOpen(false);
+	};
 
 	if (isLoading) {
 		return (
@@ -23,7 +38,8 @@ const SongsTable = () => {
 	}
 
 	return (
-		<Table>
+		<>
+			<Table>
 			<TableHeader>
 				<TableRow className='hover:bg-zinc-800/50'>
 					<TableHead className='w-[50px]'></TableHead>
@@ -54,6 +70,14 @@ const SongsTable = () => {
 								<Button
 									variant={"ghost"}
 									size={"sm"}
+									className='text-blue-400 hover:text-blue-300 hover:bg-blue-400/10'
+									onClick={() => handleEditSong(song)}
+								>
+									<Edit className='size-4' />
+								</Button>
+								<Button
+									variant={"ghost"}
+									size={"sm"}
 									className='text-red-400 hover:text-red-300 hover:bg-red-400/10'
 									onClick={() => deleteSong(song._id)}
 								>
@@ -64,7 +88,14 @@ const SongsTable = () => {
 					</TableRow>
 				))}
 			</TableBody>
-		</Table>
+			</Table>
+
+			<EditSongDialog
+				song={editingSong}
+				isOpen={isEditDialogOpen}
+				onClose={handleCloseEditDialog}
+			/>
+		</>
 	);
 };
 export default SongsTable;

@@ -17,6 +17,12 @@ import authRoutes from "./routes/auth.route.js";
 import songRoutes from "./routes/song.route.js";
 import albumRoutes from "./routes/album.route.js";
 import statRoutes from "./routes/stat.route.js";
+import playlistRoutes from "./routes/playlist.route.js";
+import libraryRoutes from "./routes/library.route.js";
+import artistRequestRoutes from "./routes/artistRequest.route.js";
+import artistRoutes from "./routes/artist.route.js";
+import chartsRoutes from "./routes/charts.route.js";
+import artistProfileRoutes from "./routes/artist.profile.route.js";
 
 dotenv.config();
 
@@ -70,6 +76,12 @@ app.use("/api/auth", authRoutes);
 app.use("/api/songs", songRoutes);
 app.use("/api/albums", albumRoutes);
 app.use("/api/stats", statRoutes);
+app.use("/api/playlists", playlistRoutes);
+app.use("/api/library", libraryRoutes);
+app.use("/api/artist-requests", artistRequestRoutes);
+app.use("/api/artist", artistRoutes);
+app.use("/api/charts", chartsRoutes);
+app.use("/api/artist-profile", artistProfileRoutes);
 
 if (process.env.NODE_ENV === "production") {
 	app.use(express.static(path.join(__dirname, "../frontend/dist")));

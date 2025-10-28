@@ -80,3 +80,40 @@ export const getTrendingSongs = async (req, res, next) => {
 		next(error);
 	}
 };
+
+export const getSongById = async (req, res, next) => {
+	try {
+		const { id } = req.params;
+		const song = await Song.findById(id);
+		
+		if (!song) {
+			return res.status(404).json({ message: "Song not found" });
+		}
+
+		res.json(song);
+	} catch (error) {
+		next(error);
+	}
+};
+
+export const searchSongs = async (req, res, next) => {
+	try {
+		const { query } = req.query;
+		
+		if (!query) {
+			return res.json([]);
+		}
+
+		// Search songs by title or artist (case-insensitive)
+		const songs = await Song.find({
+			$or: [
+				{ title: { $regex: query, $options: "i" } },
+				{ artist: { $regex: query, $options: "i" } }
+			]
+		}).limit(20);
+
+		res.json(songs);
+	} catch (error) {
+		next(error);
+	}
+};

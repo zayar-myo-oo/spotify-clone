@@ -19,6 +19,26 @@ export interface Album {
 	songs: Song[];
 }
 
+export interface Playlist {
+	_id: string;
+	name: string;
+	description: string;
+	imageUrl: string;
+	userId: string;
+	songs: Song[];
+	isPublic: boolean;
+	isLikedSongs: boolean;
+	createdAt: string;
+	updatedAt: string;
+}
+
+export interface UserLibrary {
+	likedSongs: Song[];
+	likedAlbums: Album[];
+	followedArtists: string[];
+	playlists: Playlist[];
+}
+
 export interface Stats {
 	totalSongs: number;
 	totalAlbums: number;

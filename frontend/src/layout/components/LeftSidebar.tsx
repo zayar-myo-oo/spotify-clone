@@ -1,26 +1,64 @@
-import PlaylistSkeleton from "@/components/skeletons/PlaylistSkeleton";
 import { buttonVariants } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { useMusicStore } from "@/stores/useMusicStore";
+import LibrarySection from "@/components/LibrarySection";
+import ArtistRequestDialog from "@/components/ArtistRequestDialog";
 import { SignedIn } from "@clerk/clerk-react";
-import { HomeIcon, Library, MessageCircle } from "lucide-react";
-import { useEffect } from "react";
+import { useAuthStore } from "@/stores/useAuthStore";
+import { HomeIcon, MessageCircle, Music, SearchIcon, TrendingUp } from "lucide-react";
 import { Link } from "react-router-dom";
 
+const ArtistRequestSection = () => {
+	const { isAdmin, isArtist } = useAuthStore();
+
+	if (isAdmin) {
+		return (
+			<div className='rounded-lg bg-zinc-900 p-4'>
+				<Link
+					to='/admin'
+					className={cn(
+						buttonVariants({
+							variant: "default",
+							className: "w-full justify-start bg-blue-500 hover:bg-blue-600 text-white",
+						})
+					)}
+				>
+					<Music className='mr-2 size-4' />
+					Admin Dashboard
+				</Link>
+			</div>
+		);
+	}
+
+	if (isArtist) {
+		return (
+			<div className='rounded-lg bg-zinc-900 p-4'>
+				<Link
+					to='/artist'
+					className={cn(
+						buttonVariants({
+							variant: "default",
+							className: "w-full justify-start bg-emerald-500 hover:bg-emerald-600 text-black",
+						})
+					)}
+				>
+					<Music className='mr-2 size-4' />
+					Artist Dashboard
+				</Link>
+			</div>
+		);
+	}
+
+	return (
+		<div className='rounded-lg bg-zinc-900 p-4'>
+			<ArtistRequestDialog />
+		</div>
+	);
+};
+
 const LeftSidebar = () => {
-	const { albums, fetchAlbums, isLoading } = useMusicStore();
-
-	useEffect(() => {
-		fetchAlbums();
-	}, [fetchAlbums]);
-
-	console.log({ albums });
-
 	return (
 		<div className='h-full flex flex-col gap-2'>
 			{/* Navigation menu */}
-
 			<div className='rounded-lg bg-zinc-900 p-4'>
 				<div className='space-y-2'>
 					<Link
@@ -34,6 +72,31 @@ const LeftSidebar = () => {
 					>
 						<HomeIcon className='mr-2 size-5' />
 						<span className='hidden md:inline'>Home</span>
+					</Link>
+					<Link
+						to={"/search"}
+						className={cn(
+							buttonVariants({
+								variant: "ghost",
+								className: "w-full justify-start text-white hover:bg-zinc-800",
+							})
+						)}
+					>
+						<SearchIcon className='mr-2 size-5' />
+						<span className='hidden md:inline'>Search</span>
+					</Link>
+
+					<Link
+						to={"/charts"}
+						className={cn(
+							buttonVariants({
+								variant: "ghost",
+								className: "w-full justify-start text-white hover:bg-zinc-800",
+							})
+						)}
+					>
+						<TrendingUp className='mr-2 size-5' />
+						<span className='hidden md:inline'>Charts</span>
 					</Link>
 
 					<SignedIn>
@@ -53,41 +116,16 @@ const LeftSidebar = () => {
 				</div>
 			</div>
 
+			{/* Artist Request */}
+			<SignedIn>
+				<ArtistRequestSection />
+			</SignedIn>
+
 			{/* Library section */}
-			<div className='flex-1 rounded-lg bg-zinc-900 p-4'>
-				<div className='flex items-center justify-between mb-4'>
-					<div className='flex items-center text-white px-2'>
-						<Library className='size-5 mr-2' />
-						<span className='hidden md:inline'>Playlists</span>
-					</div>
-				</div>
-
-				<ScrollArea className='h-[calc(100vh-300px)]'>
-					<div className='space-y-2'>
-						{isLoading ? (
-							<PlaylistSkeleton />
-						) : (
-							albums.map((album) => (
-								<Link
-									to={`/albums/${album._id}`}
-									key={album._id}
-									className='p-2 hover:bg-zinc-800 rounded-md flex items-center gap-3 group cursor-pointer'
-								>
-									<img
-										src={album.imageUrl}
-										alt='Playlist img'
-										className='size-12 rounded-md flex-shrink-0 object-cover'
-									/>
-
-									<div className='flex-1 min-w-0 hidden md:block'>
-										<p className='font-medium truncate'>{album.title}</p>
-										<p className='text-sm text-zinc-400 truncate'>Album • {album.artist}</p>
-									</div>
-								</Link>
-							))
-						)}
-					</div>
-				</ScrollArea>
+			<div className='flex-1 rounded-lg bg-zinc-900 overflow-hidden'>
+				<SignedIn>
+					<LibrarySection />
+				</SignedIn>
 			</div>
 		</div>
 	);

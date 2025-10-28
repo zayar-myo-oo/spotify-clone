@@ -1,6 +1,7 @@
 import { Song } from "../models/song.model.js";
 import { Album } from "../models/album.model.js";
 import cloudinary from "../lib/cloudinary.js";
+import { parseFile } from "music-metadata";
 
 // helper function for cloudinary uploads
 const uploadToCloudinary = async (file) => {
@@ -21,9 +22,13 @@ export const createSong = async (req, res, next) => {
 			return res.status(400).json({ message: "Please upload all files" });
 		}
 
-		const { title, artist, albumId, duration } = req.body;
+		const { title, artist, albumId } = req.body;
 		const audioFile = req.files.audioFile;
 		const imageFile = req.files.imageFile;
+
+		// Extract duration from audio file
+		const metadata = await parseFile(audioFile.tempFilePath);
+		const duration = Math.round(metadata.format.duration || 0);
 
 		const audioUrl = await uploadToCloudinary(audioFile);
 		const imageUrl = await uploadToCloudinary(imageFile);
@@ -48,6 +53,66 @@ export const createSong = async (req, res, next) => {
 		res.status(201).json(song);
 	} catch (error) {
 		console.log("Error in createSong", error);
+		next(error);
+	}
+};
+
+export const updateSong = async (req, res, next) => {
+	try {
+		const { id } = req.params;
+		const { title, artist, albumId } = req.body;
+		let duration = song.duration; // Keep existing duration by default
+
+		const song = await Song.findById(id);
+		if (!song) {
+			return res.status(404).json({ message: "Song not found" });
+		}
+
+		const oldAlbumId = song.albumId;
+
+		// Handle file uploads if provided
+		let audioUrl = song.audioUrl;
+		let imageUrl = song.imageUrl;
+
+		if (req.files?.audioFile) {
+			// Extract duration from new audio file
+			const metadata = await parseFile(req.files.audioFile.tempFilePath);
+			duration = Math.round(metadata.format.duration || 0);
+			audioUrl = await uploadToCloudinary(req.files.audioFile);
+		}
+		if (req.files?.imageFile) {
+			imageUrl = await uploadToCloudinary(req.files.imageFile);
+		}
+
+		// Update song
+		const updatedSong = await Song.findByIdAndUpdate(
+			id,
+			{
+				title,
+				artist,
+				audioUrl,
+				imageUrl,
+				duration,
+				albumId: albumId || null,
+			},
+			{ new: true }
+		);
+
+		// Handle album changes
+		if (oldAlbumId && oldAlbumId.toString() !== albumId) {
+			await Album.findByIdAndUpdate(oldAlbumId, {
+				$pull: { songs: song._id },
+			});
+		}
+		if (albumId && oldAlbumId?.toString() !== albumId) {
+			await Album.findByIdAndUpdate(albumId, {
+				$push: { songs: song._id },
+			});
+		}
+
+		res.status(200).json(updatedSong);
+	} catch (error) {
+		console.log("Error in updateSong", error);
 		next(error);
 	}
 };
