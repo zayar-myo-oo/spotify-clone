@@ -3,8 +3,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { axiosInstance } from "@/lib/axios";
 import { usePlayerStore } from "@/stores/usePlayerStore";
 import { useLibraryStore } from "@/stores/useLibraryStore";
+import { useUserStore } from "@/stores/useUserStore";
 import { Album, Song } from "@/types";
-import { Heart, Play, UserPlus, UserMinus, Music } from "lucide-react";
+import { Heart, Play, UserPlus, UserMinus, Music, BarChart3 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
@@ -36,6 +37,7 @@ const ArtistProfilePage = () => {
 
 	const { setCurrentSong, currentSong, playAlbum } = usePlayerStore();
 	const { toggleLikeSong, userLibrary } = useLibraryStore();
+	const { currentUser, fetchCurrentUser } = useUserStore();
 
 	const fetchArtistProfile = async () => {
 		try {
@@ -91,8 +93,11 @@ const ArtistProfilePage = () => {
 	useEffect(() => {
 		if (artistName) {
 			fetchArtistProfile();
+			fetchCurrentUser();
 		}
 	}, [artistName]);
+
+	const isOwnProfile = currentUser?.isArtist && currentUser?.artistName === artistName;
 
 	if (isLoading) {
 		return <div className="text-center py-8">Loading artist profile...</div>;
@@ -143,17 +148,27 @@ const ArtistProfilePage = () => {
 								<Play className="h-7 w-7 text-black" />
 							</Button>
 
-							<Button
-								onClick={handleFollow}
-								variant="outline"
-								className={`px-6 ${isFollowing ? 'bg-zinc-800 text-white' : 'bg-transparent border-white text-white hover:bg-white hover:text-black'}`}
-							>
-								{isFollowing ? (
-									<><UserMinus className="w-4 h-4 mr-2" />Following</>
-								) : (
-									<><UserPlus className="w-4 h-4 mr-2" />Follow</>
-								)}
-							</Button>
+							{isOwnProfile ? (
+								<Button
+									onClick={() => navigate('/artist')}
+									variant="outline"
+									className="px-6 bg-transparent border-white text-white hover:bg-white hover:text-black"
+								>
+									<BarChart3 className="w-4 h-4 mr-2" />Dashboard
+								</Button>
+							) : (
+								<Button
+									onClick={handleFollow}
+									variant="outline"
+									className={`px-6 ${isFollowing ? 'bg-zinc-800 text-white' : 'bg-transparent border-white text-white hover:bg-white hover:text-black'}`}
+								>
+									{isFollowing ? (
+										<><UserMinus className="w-4 h-4 mr-2" />Following</>
+									) : (
+										<><UserPlus className="w-4 h-4 mr-2" />Follow</>
+									)}
+								</Button>
+							)}
 						</div>
 
 						{/* Popular Songs */}
