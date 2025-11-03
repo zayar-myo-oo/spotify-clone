@@ -1,4 +1,5 @@
-import { useAuthStore } from "@/stores/useAuthStore";
+import
+{ useAuthStore } from "@/stores/useAuthStore";
 import { useArtistStore } from "@/stores/useArtistStore";
 import { useEffect } from "react";
 import { Music, Album, Users, BarChart3 } from "lucide-react";
