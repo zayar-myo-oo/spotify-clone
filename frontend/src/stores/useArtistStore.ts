@@ -7,12 +7,14 @@ interface ArtistStore {
 	songs: Song[];
 	albums: Album[];
 	followers: any[];
+	dailyStats: any[];
 	isLoading: boolean;
 	error: string | null;
 
 	fetchArtistAlbums: () => Promise<void>;
 	fetchArtistSongs: () => Promise<void>;
 	fetchArtistFollowers: () => Promise<void>;
+	fetchArtistAnalytics: () => Promise<void>;
 	updateSong: (id: string, formData: FormData) => Promise<void>;
 	deleteSong: (id: string) => Promise<void>;
 	createSong: (formData: FormData) => Promise<void>;
@@ -23,6 +25,7 @@ export const useArtistStore = create<ArtistStore>((set) => ({
 	albums: [],
 	songs: [],
 	followers: [],
+	dailyStats: [],
 	isLoading: false,
 	error: null,
 
@@ -95,7 +98,20 @@ export const useArtistStore = create<ArtistStore>((set) => ({
 	createSong: async (formData) => {
 		set({ isLoading: true, error: null });
 		try {
-			await axiosInstance.post("/artist/songs", formData);
+			const response = await axiosInstance.post("/artist/songs", formData);
+			const newSong = response.data;
+			
+			// Update songs array
+			set((state) => ({
+				songs: [...state.songs, newSong]
+			}));
+			
+			// If song has albumId, refresh albums to show updated album with new song
+			if (newSong.albumId) {
+				const albumsResponse = await axiosInstance.get("/artist/albums");
+				set({ albums: albumsResponse.data });
+			}
+			
 			toast.success("Song created successfully");
 		} catch (error: any) {
 			toast.error("Failed to create song");
@@ -108,9 +124,27 @@ export const useArtistStore = create<ArtistStore>((set) => ({
 		set({ isLoading: true, error: null });
 		try {
 			await axiosInstance.post("/artist/albums", formData);
+			// Refresh albums data
+			const response = await axiosInstance.get("/artist/albums");
+			set({ albums: response.data });
 			toast.success("Album created successfully");
 		} catch (error: any) {
 			toast.error("Failed to create album");
+		} finally {
+			set({ isLoading: false });
+		}
+	},
+
+	fetchArtistAnalytics: async () => {
+		set({ isLoading: true, error: null });
+		try {
+			const response = await axiosInstance.get("/analytics/artist-stats");
+			set({ 
+				songs: response.data.songs,
+				dailyStats: response.data.dailyStats
+			});
+		} catch (error: any) {
+			set({ error: error.response?.data?.message || "Failed to fetch analytics" });
 		} finally {
 			set({ isLoading: false });
 		}

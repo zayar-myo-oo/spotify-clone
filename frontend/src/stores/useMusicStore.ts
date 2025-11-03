@@ -14,6 +14,11 @@ interface MusicStore {
 	trendingSongs: Song[];
 	searchResults: Song[];
 	stats: Stats;
+	adminAnalytics: {
+		topSongs: Song[];
+		artistStats: any[];
+		monthlyTrends: any[];
+	};
 
 	fetchAlbums: () => Promise<void>;
 	fetchAlbumById: (id: string) => Promise<void>;
@@ -22,6 +27,7 @@ interface MusicStore {
 	fetchTrendingSongs: () => Promise<void>;
 	fetchStats: () => Promise<void>;
 	fetchSongs: () => Promise<void>;
+	fetchAdminAnalytics: () => Promise<void>;
 	searchSongs: (query: string) => Promise<void>;
 	clearSearchResults: () => void;
 	updateSong: (id: string, formData: FormData) => Promise<void>;
@@ -44,6 +50,11 @@ export const useMusicStore = create<MusicStore>((set) => ({
 		totalAlbums: 0,
 		totalUsers: 0,
 		totalArtists: 0,
+	},
+	adminAnalytics: {
+		topSongs: [],
+		artistStats: [],
+		monthlyTrends: [],
 	},
 
 	updateSong: async (id, formData) => {
@@ -202,5 +213,23 @@ export const useMusicStore = create<MusicStore>((set) => ({
 
 	clearSearchResults: () => {
 		set({ searchResults: [] });
+	},
+
+	fetchAdminAnalytics: async () => {
+		set({ isLoading: true, error: null });
+		try {
+			const response = await axiosInstance.get("/analytics/admin-stats");
+			set({ 
+				adminAnalytics: {
+					topSongs: response.data.songs,
+					artistStats: response.data.artistStats,
+					monthlyTrends: response.data.monthlyTrends
+				}
+			});
+		} catch (error: any) {
+			set({ error: error.response?.data?.message || "Failed to fetch admin analytics" });
+		} finally {
+			set({ isLoading: false });
+		}
 	},
 }));

@@ -1,8 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useMusicStore } from "@/stores/useMusicStore";
 import { usePlayerStore } from "@/stores/usePlayerStore";
 import { useLibraryStore } from "@/stores/useLibraryStore";
+import { axiosInstance } from "@/lib/axios";
 import { Clock, Heart, MoreHorizontal, Pause, Play, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
@@ -17,21 +17,30 @@ const formatDuration = (seconds: number) => {
 
 const SongPage = () => {
 	const { songId } = useParams();
-	const { songs, fetchSongs } = useMusicStore();
 	const { currentSong, isPlaying, setCurrentSong, togglePlay } = usePlayerStore();
 	const { toggleLikeSong, userLibrary, fetchUserLibrary } = useLibraryStore();
 	const [selectedSongForPlaylist, setSelectedSongForPlaylist] = useState<Song | null>(null);
-
-	const song = songs.find(s => s._id === songId);
+	const [song, setSong] = useState<Song | null>(null);
+	const [isLoading, setIsLoading] = useState(true);
 
 	useEffect(() => {
 		fetchUserLibrary();
-		if (songs.length === 0) {
-			fetchSongs();
-		}
-	}, [fetchUserLibrary, fetchSongs, songs.length]);
+		const fetchSong = async () => {
+			if (!songId) return;
+			try {
+				setIsLoading(true);
+				const response = await axiosInstance.get(`/songs/${songId}`);
+				setSong(response.data);
+			} catch (error) {
+				console.error('Error fetching song:', error);
+			} finally {
+				setIsLoading(false);
+			}
+		};
+		fetchSong();
+	}, [songId, fetchUserLibrary]);
 
-	if (songs.length === 0) return <div className="text-center py-8">Loading...</div>;
+	if (isLoading) return <div className="text-center py-8">Loading...</div>;
 	if (!song) return <div className="text-center py-8">Song not found</div>;
 
 	const handlePlaySong = () => {

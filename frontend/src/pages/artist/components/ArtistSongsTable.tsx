@@ -1,13 +1,15 @@
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useArtistStore } from "@/stores/useArtistStore";
-import { Calendar, Edit, Trash2 } from "lucide-react";
+import { usePlayerStore } from "@/stores/usePlayerStore";
+import { Calendar, Edit, Trash2, Play } from "lucide-react";
 import { useState } from "react";
 import { Song } from "@/types";
 import ArtistEditSongDialog from "./ArtistEditSongDialog";
 
 const ArtistSongsTable = () => {
 	const { songs, isLoading, error, deleteSong } = useArtistStore();
+	const { setCurrentSong, initializeQueue } = usePlayerStore();
 	const [editingSong, setEditingSong] = useState<Song | null>(null);
 	const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
@@ -19,6 +21,11 @@ const ArtistSongsTable = () => {
 	const handleCloseEditDialog = () => {
 		setEditingSong(null);
 		setIsEditDialogOpen(false);
+	};
+
+	const handlePlaySong = (song: Song) => {
+		initializeQueue(songs);
+		setCurrentSong(song);
 	};
 
 	if (isLoading) {
@@ -69,6 +76,14 @@ const ArtistSongsTable = () => {
 
 						<TableCell className='text-right'>
 							<div className='flex gap-2 justify-end'>
+								<Button
+									variant={"ghost"}
+									size={"sm"}
+									className='text-green-400 hover:text-green-300 hover:bg-green-400/10'
+									onClick={() => handlePlaySong(song)}
+								>
+									<Play className='size-4' />
+								</Button>
 								<Button
 									variant={"ghost"}
 									size={"sm"}

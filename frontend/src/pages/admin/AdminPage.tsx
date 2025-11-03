@@ -1,24 +1,27 @@
 import { useAuthStore } from "@/stores/useAuthStore";
 import Header from "./components/Header";
 import DashboardStats from "./components/DashboardStats";
-import { Album, Music, Users } from "lucide-react";
+import { Album, Music, Users, BarChart3 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import SongsTabContent from "./components/SongsTabContent";
 import AlbumsTabContent from "./components/AlbumsTabContent";
 import ArtistRequestsTable from "./components/ArtistRequestsTable";
+import AdminSongStats from "./components/AdminSongStats";
+import TopArtistsChart from "./components/TopArtistsChart";
 import { useEffect } from "react";
 import { useMusicStore } from "@/stores/useMusicStore";
 
 const AdminPage = () => {
 	const { isAdmin, isLoading } = useAuthStore();
 
-	const { fetchAlbums, fetchSongs, fetchStats } = useMusicStore();
+	const { fetchAlbums, fetchSongs, fetchStats, fetchAdminAnalytics } = useMusicStore();
 
 	useEffect(() => {
 		fetchAlbums();
 		fetchSongs();
 		fetchStats();
-	}, [fetchAlbums, fetchSongs, fetchStats]);
+		fetchAdminAnalytics();
+	}, [fetchAlbums, fetchSongs, fetchStats, fetchAdminAnalytics]);
 
 	if (!isAdmin && !isLoading) return <div>Unauthorized</div>;
 
@@ -31,8 +34,12 @@ const AdminPage = () => {
 
 			<DashboardStats />
 
-			<Tabs defaultValue='songs' className='space-y-6'>
+			<Tabs defaultValue='analytics' className='space-y-6'>
 				<TabsList className='p-1 bg-zinc-800/50'>
+					<TabsTrigger value='analytics' className='data-[state=active]:bg-zinc-700'>
+						<BarChart3 className='mr-2 size-4' />
+						Analytics
+					</TabsTrigger>
 					<TabsTrigger value='songs' className='data-[state=active]:bg-zinc-700'>
 						<Music className='mr-2 size-4' />
 						Songs
@@ -46,6 +53,13 @@ const AdminPage = () => {
 						Artist Requests
 					</TabsTrigger>
 				</TabsList>
+
+				<TabsContent value='analytics'>
+					<div className='space-y-6'>
+						<AdminSongStats />
+						<TopArtistsChart />
+					</div>
+				</TabsContent>
 
 				<TabsContent value='songs'>
 					<SongsTabContent />

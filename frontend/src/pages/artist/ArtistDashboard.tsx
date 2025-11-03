@@ -1,21 +1,25 @@
 import { useAuthStore } from "@/stores/useAuthStore";
 import { useArtistStore } from "@/stores/useArtistStore";
 import { useEffect } from "react";
-import { Music, Album, Users } from "lucide-react";
+import { Music, Album, Users, BarChart3 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ArtistAddSongDialog from "./components/ArtistAddSongDialog";
 import ArtistSongsTable from "./components/ArtistSongsTable";
 import ArtistAlbumsTable from "./components/ArtistAlbumsTable";
+import ArtistListensChart from "./components/ArtistListensChart";
+import SongListeningStats from "./components/SongListeningStats";
+import ArtistAddAlbumDialog from "./components/ArtistAddAlbumDialog";
 
 const ArtistDashboard = () => {
 	const { isArtist, isLoading } = useAuthStore();
-	const { fetchArtistAlbums, fetchArtistSongs, fetchArtistFollowers, albums, songs, followers } = useArtistStore();
+	const { fetchArtistAlbums, fetchArtistSongs, fetchArtistFollowers, fetchArtistAnalytics, albums, songs, followers, dailyStats } = useArtistStore();
 
 	useEffect(() => {
 		fetchArtistAlbums();
 		fetchArtistSongs();
 		fetchArtistFollowers();
-	}, [fetchArtistAlbums, fetchArtistSongs, fetchArtistFollowers]);
+		fetchArtistAnalytics();
+	}, [fetchArtistAlbums, fetchArtistSongs, fetchArtistFollowers, fetchArtistAnalytics]);
 
 	if (!isArtist && !isLoading) return <div>Unauthorized - Artist access only</div>;
 
@@ -59,8 +63,17 @@ const ArtistDashboard = () => {
 				</div>
 			</div>
 
-			<Tabs defaultValue="songs" className="space-y-6">
+			{/* Chart */}
+			<div className="mb-8">
+				<ArtistListensChart />
+			</div>
+
+			<Tabs defaultValue="analytics" className="space-y-6">
 				<TabsList className="p-1 bg-zinc-800/50">
+					<TabsTrigger value="analytics" className="data-[state=active]:bg-zinc-700">
+						<BarChart3 className="mr-2 size-4" />
+						Analytics
+					</TabsTrigger>
 					<TabsTrigger value="songs" className="data-[state=active]:bg-zinc-700">
 						<Music className="mr-2 size-4" />
 						Songs
@@ -74,6 +87,10 @@ const ArtistDashboard = () => {
 						Followers
 					</TabsTrigger>
 				</TabsList>
+
+				<TabsContent value="analytics">
+					<SongListeningStats />
+				</TabsContent>
 
 				<TabsContent value="songs">
 					<div className="bg-zinc-800/50 rounded-lg p-6">
@@ -89,6 +106,7 @@ const ArtistDashboard = () => {
 					<div className="bg-zinc-800/50 rounded-lg p-6">
 						<div className="flex items-center justify-between mb-6">
 							<h2 className="text-xl font-semibold">My Albums</h2>
+							<ArtistAddAlbumDialog />
 						</div>
 						<ArtistAlbumsTable />
 					</div>

@@ -15,6 +15,7 @@ interface PlayerStore {
 	togglePlay: () => void;
 	playNext: () => void;
 	playPrevious: () => void;
+	trackPlay: (songId: string, duration: number) => Promise<void>;
 }
 
 export const usePlayerStore = create<PlayerStore>((set, get) => ({
@@ -157,6 +158,14 @@ export const usePlayerStore = create<PlayerStore>((set, get) => ({
 					activity: `Idle`,
 				});
 			}
+		}
+	},
+
+	trackPlay: async (songId: string, duration: number) => {
+		try {
+			await axiosInstance.post("/analytics/track-play", { songId, duration });
+		} catch (error) {
+			console.log("Error tracking play:", error);
 		}
 	},
 }));
