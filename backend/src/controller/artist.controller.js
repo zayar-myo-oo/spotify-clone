@@ -17,7 +17,20 @@ const uploadToCloudinary = async (file) => {
 
 export const getArtistAlbums = async (req, res, next) => {
 	try {
-		const albums = await Album.find({ artist: req.user.artistName }).populate("songs");
+		// First, sync any songs that might not be properly linked to albums
+		const songs = await Song.find({ artist: req.user.artistName, albumId: { $ne: null } });
+		for (const song of songs) {
+			if (song.albumId) {
+				await Album.findByIdAndUpdate(song.albumId, {
+					$addToSet: { songs: song._id }
+				});
+			}
+		}
+
+		const albums = await Album.find({ artist: req.user.artistName }).populate({
+			path: "songs",
+			select: "title artist imageUrl audioUrl duration playCount weeklyPlays monthlyPlays createdAt"
+		}).lean();
 		res.status(200).json(albums);
 	} catch (error) {
 		next(error);
@@ -63,7 +76,7 @@ export const createSong = async (req, res, next) => {
 
 		if (albumId) {
 			await Album.findByIdAndUpdate(albumId, {
-				$push: { songs: song._id },
+				$addToSet: { songs: song._id },
 			});
 		}
 		

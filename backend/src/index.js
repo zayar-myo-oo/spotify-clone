@@ -23,6 +23,7 @@ import artistRequestRoutes from "./routes/artistRequest.route.js";
 import artistRoutes from "./routes/artist.route.js";
 import chartsRoutes from "./routes/charts.route.js";
 import artistProfileRoutes from "./routes/artist.profile.route.js";
+import analyticsRoutes from "./routes/analytics.route.js";
 
 dotenv.config();
 
@@ -82,6 +83,7 @@ app.use("/api/artist-requests", artistRequestRoutes);
 app.use("/api/artist", artistRoutes);
 app.use("/api/charts", chartsRoutes);
 app.use("/api/artist-profile", artistProfileRoutes);
+app.use("/api/analytics", analyticsRoutes);
 
 if (process.env.NODE_ENV === "production") {
 	app.use(express.static(path.join(__dirname, "../frontend/dist")));

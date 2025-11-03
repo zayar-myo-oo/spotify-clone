@@ -1,12 +1,18 @@
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useArtistStore } from "@/stores/useArtistStore";
-import { Calendar, ChevronDown, ChevronRight, Music, Edit } from "lucide-react";
+import { usePlayerStore } from "@/stores/usePlayerStore";
+import { Calendar, ChevronDown, ChevronRight, Music, Edit, Play, Trash2 } from "lucide-react";
 import React, { useState } from "react";
+import { Album } from "@/types";
+import ArtistEditAlbumDialog from "./ArtistEditAlbumDialog";
 
 const ArtistAlbumsTable = () => {
-	const { albums, isLoading, error } = useArtistStore();
+	const { albums, isLoading, error, deleteSong, fetchArtistAlbums } = useArtistStore();
+	const { setCurrentSong } = usePlayerStore();
 	const [expandedAlbums, setExpandedAlbums] = useState<Set<string>>(new Set());
+	const [editingAlbum, setEditingAlbum] = useState<Album | null>(null);
+	const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
 	const toggleAlbum = (albumId: string) => {
 		setExpandedAlbums(prev => {
@@ -18,6 +24,27 @@ const ArtistAlbumsTable = () => {
 			}
 			return newSet;
 		});
+	};
+
+	const handleEditAlbum = (album: Album) => {
+		setEditingAlbum(album);
+		setIsEditDialogOpen(true);
+	};
+
+	const handleCloseEditDialog = () => {
+		setEditingAlbum(null);
+		setIsEditDialogOpen(false);
+	};
+
+	const handlePlaySong = (song: any) => {
+		setCurrentSong(song);
+	};
+
+	const handleDeleteSong = async (songId: string) => {
+		if (confirm('Are you sure you want to delete this song?')) {
+			await deleteSong(songId);
+			await fetchArtistAlbums();
+		}
 	};
 
 	if (isLoading) {
@@ -36,9 +63,18 @@ const ArtistAlbumsTable = () => {
 		);
 	}
 
+	if (albums.length === 0) {
+		return (
+			<div className='text-center py-8 text-zinc-400'>
+				<div className='mb-4'>There is no album</div>
+			</div>
+		);
+	}
+
 	return (
-		<Table>
-			<TableHeader>
+		<>
+			<Table>
+				<TableHeader>
 				<TableRow className='hover:bg-zinc-800/50'>
 					<TableHead className='w-[50px]'></TableHead>
 					<TableHead>Title</TableHead>
@@ -79,6 +115,7 @@ const ArtistAlbumsTable = () => {
 										variant='ghost'
 										size='sm'
 										className='text-blue-400 hover:text-blue-300 hover:bg-blue-400/10'
+										onClick={() => handleEditAlbum(album)}
 									>
 										<Edit className='h-4 w-4' />
 									</Button>
@@ -92,25 +129,44 @@ const ArtistAlbumsTable = () => {
 										<div className='space-y-2'>
 											<h4 className='font-medium text-zinc-300 mb-3'>Songs in this album:</h4>
 											{album.songs.map((song, index) => (
-												<div key={`${album._id}-song-${song._id || index}`} className='flex items-center gap-3 p-2 rounded bg-zinc-700/50'>
+												<div key={`${album._id}-song-${song._id || index}`} className='flex items-center gap-3 p-2 rounded bg-zinc-700/50 hover:bg-zinc-600/50 transition-colors'>
 													<span className='text-zinc-400 text-sm w-6'>{index + 1}</span>
 													<img src={song.imageUrl || '/placeholder.png'} alt={song.title || 'Unknown'} className='w-8 h-8 rounded object-cover' />
 													<div className='flex-1'>
 														<div className='font-medium text-zinc-200'>{song.title || 'Unknown Title'}</div>
 														<div className='text-sm text-zinc-400'>{song.artist || 'Unknown Artist'}</div>
 													</div>
-													<span className='text-zinc-400 text-sm'>
-														{song.duration && !isNaN(song.duration) 
+													<span className='text-zinc-400 text-sm mr-2'>
+														{song.duration && !isNaN(song.duration)
 															? `${Math.floor(song.duration / 60)}:${(song.duration % 60).toString().padStart(2, '0')}`
 															: '0:00'
 														}
 													</span>
+													<div className='flex gap-1'>
+														<Button
+															variant='ghost'
+															size='sm'
+															className='text-green-400 hover:text-green-300 hover:bg-green-400/10 h-8 w-8 p-0'
+															onClick={() => handlePlaySong(song)}
+														>
+															<Play className='h-4 w-4' />
+														</Button>
+														<Button
+															variant='ghost'
+															size='sm'
+															className='text-red-400 hover:text-red-300 hover:bg-red-400/10 h-8 w-8 p-0'
+															onClick={() => handleDeleteSong(song._id)}
+														>
+															<Trash2 className='h-4 w-4' />
+														</Button>
+													</div>
 												</div>
 											))}
 										</div>
 									) : (
 										<div className='text-center py-4 text-zinc-400'>
-											ဒီ Album မှာ သီချင်းမရှိပါ
+											<Music className='w-12 h-12 mx-auto mb-2 opacity-50' />
+											<p className='text-sm'>No songs in this album</p>
 										</div>
 									)}
 								</TableCell>
@@ -118,8 +174,15 @@ const ArtistAlbumsTable = () => {
 						)}
 					</React.Fragment>
 				))}
-			</TableBody>
-		</Table>
+				</TableBody>
+			</Table>
+
+		<ArtistEditAlbumDialog
+			album={editingAlbum}
+			isOpen={isEditDialogOpen}
+			onClose={handleCloseEditDialog}
+		/>
+	</>
 	);
 };
 
