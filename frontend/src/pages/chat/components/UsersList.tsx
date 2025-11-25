@@ -27,7 +27,11 @@ const UsersList = () => {
 											<AvatarImage src={user.imageUrl} />
 											<AvatarFallback>{user.fullName[0]}</AvatarFallback>
 										</Avatar>
-
+										<div
+											className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-zinc-900 ${
+												onlineUsers.has(user.clerkId) ? "bg-green-500" : "bg-zinc-500"
+											}`}
+										/>
 									</div>
 
 									<div className='flex-1 min-w-0 lg:block hidden'>

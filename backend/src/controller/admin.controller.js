@@ -61,12 +61,13 @@ export const updateSong = async (req, res, next) => {
 	try {
 		const { id } = req.params;
 		const { title, artist, albumId } = req.body;
-		let duration = song.duration; // Keep existing duration by default
 
 		const song = await Song.findById(id);
 		if (!song) {
 			return res.status(404).json({ message: "Song not found" });
 		}
+
+		let duration = song.duration; // Keep existing duration by default
 
 		const oldAlbumId = song.albumId;
 
